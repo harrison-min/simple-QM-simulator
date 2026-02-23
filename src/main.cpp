@@ -1,8 +1,7 @@
-#include <thrust/device_vector.h>
+#include "quantumState.hpp"
 #include <iostream>
 int main () {
-    thrust::device_vector<int> dev;
-    std::cerr << "Include test success!";
-
+    QuantumState q (100, 100);
+    q.debugPrint();
     return 0;
 }
