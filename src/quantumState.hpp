@@ -10,9 +10,9 @@ class QuantumState {
         thrust::device_vector <double> potentialEnergy;
         void intitializeState();
         void normalizePsi();    
+        void applyPotentialEnergyFilter(double timeInterval);
     public:
         QuantumState (int numberOfSlices, double length);
         void debugPrint();
-
 };
 

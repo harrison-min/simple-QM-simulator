@@ -5,6 +5,7 @@
 #include <iomanip>
 
 namespace {
+    
     struct GaussianFunctor {
         double sigmaSquared;
         double mean;
@@ -37,6 +38,19 @@ namespace {
 
         __device__ thrust::complex<double> operator ()(const thrust::complex<double> & c) const{
             return c * scaleFactor;
+        }
+    };
+
+    struct PotentialEnergyFilterFunctor {
+        double timeInterval;
+
+        PotentialEnergyFilterFunctor(double time) : timeInterval{time} {
+
+        }
+
+        __device__ thrust::complex<double> operator() (const thrust::complex<double> &psi, const double & potentialEnergy) const {
+            double exponent = -potentialEnergy * timeInterval / 2.0;
+            return psi * std::exp(exponent);
         }
     };
 }
@@ -98,4 +112,10 @@ void QuantumState::debugPrint() {
 
     std::cout << "Sum is: " << sum;
 
+}
+
+void QuantumState::applyPotentialEnergyFilter(double timeInterval) {
+    PotentialEnergyFilterFunctor func (timeInterval);
+    
+    thrust::transform (psi.begin(), psi.end(), potentialEnergy.begin(), psi.begin(), func);
 }
