@@ -1,4 +1,8 @@
 #include "quantumState.hpp"
+#include "fft.hpp"
+
+
+#include <vector>
 #include <cmath>
 #include <thrust/transform_reduce.h> 
 #include <vector>
@@ -118,4 +122,24 @@ void QuantumState::applyPotentialEnergyFilter(double timeInterval) {
     PotentialEnergyFilterFunctor func (timeInterval);
     
     thrust::transform (psi.begin(), psi.end(), potentialEnergy.begin(), psi.begin(), func);
+}
+
+void QuantumState::runFFT() {
+    std::vector<thrust::complex<double>> input (psi.begin(), psi.end());
+    std::vector<thrust::complex<double>> output(input.size());
+    
+    myFFT::dftTest(input, output);
+
+    psi = output;
+    debugPrint();
+}
+
+void QuantumState::runInverseFFT() { 
+    std::vector<thrust::complex<double>> input (psi.begin(), psi.end());
+    std::vector<thrust::complex<double>> output(input.size());
+    
+    myFFT::inverseDftTest(input, output);
+
+    psi = output;
+    debugPrint();
 }

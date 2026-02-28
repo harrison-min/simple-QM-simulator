@@ -14,5 +14,7 @@ class QuantumState {
     public:
         QuantumState (int numberOfSlices, double length);
         void debugPrint();
+        void runFFT();
+        void runInverseFFT();
 };
 

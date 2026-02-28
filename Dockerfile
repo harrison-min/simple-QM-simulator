@@ -4,7 +4,7 @@ RUN apt-get update && rm -rf /var/lib/apt/lists/*
 
 COPY src/ /src/
 
-RUN nvcc src/main.cpp src/quantumState.cu -std=c++20 --extended-lambda -arch=sm_89 -o main
+RUN nvcc src/main.cpp src/quantumState.cu src/fft.cu -std=c++20 --extended-lambda -arch=sm_89 -o main
 RUN mkdir output
 
 ENTRYPOINT ./main 
