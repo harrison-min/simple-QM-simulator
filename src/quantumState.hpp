@@ -11,10 +11,12 @@ class QuantumState {
         void intitializeState();
         void normalizePsi();    
         void applyPotentialEnergyFilter(double timeInterval);
-    public:
-        QuantumState (int numberOfSlices, double length);
-        void debugPrint();
+        void applyKineticEnergyFilter(double timeInterval); 
         void runFFT();
         void runInverseFFT();
+    public:
+        QuantumState (int numberOfSlices, double length);
+        void updateState (double timeInterval);
+        void debugPrint();
 };
 

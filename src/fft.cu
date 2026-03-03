@@ -25,7 +25,6 @@ namespace myFFT{
         }
     }
 
-
     void inverseDftTest (std::vector<thrust::complex<double>> & input, std::vector<thrust::complex<double>> & output) {
         int totalSize = input.size();
         output.assign(totalSize, thrust::complex<double>(0, 0));

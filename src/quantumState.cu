@@ -57,6 +57,27 @@ namespace {
             return psi * std::exp(exponent);
         }
     };
+
+    struct KineticEnergyFilterFunctor {
+        double timeInterval;
+        double mass;
+        double hbar;
+        double dk;
+        int totalSlices;
+
+        KineticEnergyFilterFunctor(double time, double dx, int N) : timeInterval{time}, mass {1.0}, hbar {1.0}, totalSlices{N} {
+            dk = (2.0 * M_PI) / (N * dx);
+        }
+
+        __device__ thrust::complex<double> operator() (const thrust::complex<double> &psi, int index) const {
+            double momentum = (index <= totalSlices / 2) ? (index * dk) : (index - totalSlices) * dk;
+            double inverseMassHbarProduct = 1.0 / (mass * hbar);
+            double exponent = - momentum * momentum * timeInterval * 0.5 * inverseMassHbarProduct;
+
+            thrust::complex<double> phase (cos(exponent), sin(exponent));
+            return psi * phase;
+        }
+    };
 }
 
 QuantumState::QuantumState(int numberOfSlices, double length) :
@@ -124,6 +145,12 @@ void QuantumState::applyPotentialEnergyFilter(double timeInterval) {
     thrust::transform (psi.begin(), psi.end(), potentialEnergy.begin(), psi.begin(), func);
 }
 
+void QuantumState::applyKineticEnergyFilter(double timeInterval) {
+    KineticEnergyFilterFunctor func (timeInterval, dx, psi.size());
+
+    thrust::transform (psi.begin(), psi.end(), thrust::make_counting_iterator(0), psi.begin(), func);
+}
+
 void QuantumState::runFFT() {
     std::vector<thrust::complex<double>> input (psi.begin(), psi.end());
     std::vector<thrust::complex<double>> output(input.size());
@@ -131,7 +158,6 @@ void QuantumState::runFFT() {
     myFFT::dftTest(input, output);
 
     psi = output;
-    debugPrint();
 }
 
 void QuantumState::runInverseFFT() { 
@@ -141,5 +167,12 @@ void QuantumState::runInverseFFT() {
     myFFT::inverseDftTest(input, output);
 
     psi = output;
-    debugPrint();
+}
+
+void QuantumState::updateState (double timeInterval) {
+    applyPotentialEnergyFilter(timeInterval);
+    runFFT();
+    applyKineticEnergyFilter(timeInterval);
+    runInverseFFT();
+    normalizePsi();
 }
